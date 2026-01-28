@@ -1,20 +1,7 @@
-import express from "express";
 import { PORT } from "./config/server.config.js";
-import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.config.js";
+import app from "./app.js";
 
-const app = express();
-app.use(cookieParser());
-app.use(express.json());
-
-
-app.get("/", (req, res) => {
-    res.json({
-        success: true,
-        message: "server up and running",
-        error: ""
-    })
-})
 
 connectDB()
     .then(() => {
