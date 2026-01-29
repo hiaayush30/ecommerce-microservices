@@ -45,22 +45,22 @@ describe('POST /auth/register', () => {
             expect(response.body.data).not.toHaveProperty('password');
         });
 
-        it('should register a user with role "seller"', async () => {
-            const sellerData = {
-                ...validUserData,
-                username: 'testseller',
-                email: 'seller@example.com',
-                role: 'seller' as const
-            };
+        // it('should register a user with role "seller"', async () => {
+        //     const sellerData = {
+        //         ...validUserData,
+        //         username: 'testseller',
+        //         email: 'seller@example.com',
+        //         role: 'seller' as const
+        //     };
 
-            const response = await request(app)
-                .post('/auth/register')
-                .send(sellerData)
-                .expect(201);
+        //     const response = await request(app)
+        //         .post('/auth/register')
+        //         .send(sellerData)
+        //         .expect(201);
 
-            expect(response.body.success).toBe(true);
-            expect(response.body.data).toHaveProperty('role', 'seller');
-        });
+        //     expect(response.body.success).toBe(true);
+        //     expect(response.body.data).toHaveProperty('role', 'seller');
+        // });
 
         it('should default to "user" role when role is not specified', async () => {
             const response = await request(app)

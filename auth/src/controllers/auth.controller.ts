@@ -4,8 +4,7 @@ import { userModel } from "../models/user.model.js";
 import { z } from "zod";
 import type { registerSchema } from "../validations/auth.validation.js";
 
-
-type RegisterBody = z.infer<typeof registerSchema>['body'];
+type RegisterBody = z.infer<typeof registerSchema>['body']; // access the body property from the type
 
 export const register = async (req: Request<{},{},RegisterBody>, res: Response) => {
     try {

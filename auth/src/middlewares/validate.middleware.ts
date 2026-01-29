@@ -14,7 +14,7 @@ const validate = (schema: ZodObject) =>
             if (error instanceof z.ZodError) {
                 return res.status(400).json({
                     success: false,
-                    message: "invalid request body",
+                    message: "All fields are required",
                     error: error.issues,
                 });
             }
