@@ -1,30 +1,16 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { userModel } from "../models/user.model.js";
+import { z } from "zod";
+import type { registerSchema } from "../validations/auth.validation.js";
 
-interface RegisterRequestBody {
-    username: string;
-    email: string;
-    password: string;
-    fullname: {
-        firstName: string;
-        lastName: string;
-    };
-    role?: "user" | "seller";
-}
 
-export const register = async (req: Request<{}, {}, RegisterRequestBody>, res: Response) => {
+type RegisterBody = z.infer<typeof registerSchema>['body'];
+
+export const register = async (req: Request<{},{},RegisterBody>, res: Response) => {
     try {
-        const { username, email, password, fullname, role } = req.body;
 
-        // Validate required fields
-        if (!username || !email || !password || !fullname?.firstName || !fullname?.lastName) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-                error: "Missing required fields"
-            });
-        }
+        const { username, email, password, fullname } = req.body;
 
         // Check if user already exists
         const existingUser = await userModel.findOne({
@@ -50,8 +36,7 @@ export const register = async (req: Request<{}, {}, RegisterRequestBody>, res: R
             fullname: {
                 firstName: fullname.firstName,
                 lastName: fullname.lastName
-            },
-            role: role || "user"
+            }
         });
 
         // Remove password from response
