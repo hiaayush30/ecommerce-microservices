@@ -6,13 +6,13 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/api/v1", (req, res) => {
     res.json({
         success: true,
         message: "server up and running"
     });
 });
 
-app.use("/auth", authRouter);
+app.use("/api/v1/auth", authRouter);
 
 export default app;
