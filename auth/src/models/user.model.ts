@@ -5,7 +5,8 @@ interface IAddress extends Document {
     city: string,
     state: string,
     zip: string,
-    country: string
+    country: string,
+    isDefault: boolean
 }
 
 const addressSchema = new mongoose.Schema<IAddress>({
@@ -13,7 +14,11 @@ const addressSchema = new mongoose.Schema<IAddress>({
     city: String,
     state: String,
     zip: String,
-    country: String
+    country: String,
+    isDefault: {
+        type: Boolean,
+        default: false
+    }
 })
 
 interface IUser extends mongoose.Document {
@@ -61,6 +66,6 @@ const userSchema = new mongoose.Schema<IUser>({
         default: "user"
     },
     addresses: [addressSchema]
-})
+}, { timestamps: true })
 
 export const User = mongoose.model<IUser>("user", userSchema);

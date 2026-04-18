@@ -1,8 +1,7 @@
 import type { Request, Response } from "express";
 import { registerSchema } from "../validations/auth.validation.js";
-import bcrypt from "bcryptjs";
 import { User } from "../models/user.model.js";
-import jwt from "jsonwebtoken";
+import { createJwt, hashPassword } from "../utils/auth.util.js";
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -27,7 +26,7 @@ export const createUser = async (req: Request, res: Response) => {
                 message: "username already exists"
             })
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await hashPassword(password);
         const user = await User.create({
             username, 
             fullname,
@@ -35,7 +34,7 @@ export const createUser = async (req: Request, res: Response) => {
             password: hashedPassword
         })
 
-        const token = jwt.sign({ _id: user._id, username }, process.env.JWT_PASS!);
+        const token = createJwt({ _id: user._id, username });
         res.cookie("token", token, {
             httpOnly: true,
             secure: true,

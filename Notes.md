@@ -1,26 +1,65 @@
+## TODOS
+- Add Tests using Jest
+
 ## Notes 
 
+### 1.Microservices
 - In Microservices, services can communicate with each other synchronously or asynchronously
 
     - Synchronously via axios/fetch and is done when your service cannot proceed further without getting a response
     - Asynchronously is done via queues/message broker(RabbitMQ,BullMQ,kafka,Redis)
 ---
 
-#### Lexical scope and Closures
-- The validate middleware (`auth/src/middlewares/validate.middleware.ts`) is a perfect example of a programming concept that relies on lexical scoping, and it specifically creates what is known as a closure.
+### 2.Why array of Address schema objects and not simple objects?
 
-- Lexical (or static) scoping means that the accessibility of variables is determined by the position of the functions in the source code, not by where they are executed. An inner function has access to the variables of its outer (parent) function.
+The technical difference isn't in **how you insert** the data (the `push` syntax), but in **how Mongoose treats the data** once it’s inside that array.
 
-1. Outer Function (`validate`): You call this function in your route file (auth.routes.ts) and pass a specific schema (e.g., registerSchema) to it.
+When you use a **separate schema** (Sub-document), Mongoose wraps that object in its own internal logic. When you use a **simple array of objects**, it's just raw data.
 
-2. Inner Function (The Closure): The validate function immediately returns the inner async function. This inner function is the actual middleware that Express will execute. Because of lexical scoping, this inner function "remembers" the environment in which it was created. It maintains a reference to the schema variable that was passed to its parent. This combination of the function and its "remembered" lexical environment is called a closure.
-
-3. Execution: When a request comes in to your /register route, Express executes the inner function. Even though it's being called by Express, deep within the framework, the function still has access to the specific schema (registerSchema in this case) that it was "born" with.
+Here is the breakdown of the "under the hood" differences:
 
 ---
 
-#### TODOS
-- try express-validator instead of zod
-- write tests manually :-)
+### 1. The `_id` Factor (Identification)
+* **Separate Schema:** Mongoose automatically assigns a unique `_id` to every single address you push.
+* **Simple Object Array:** No `_id` is created.
+* **Why it matters:** In your e-commerce project, if a user wants to **delete** or **edit** a specific address, you need that ID. Without it, you’d have to find the address by comparing every single string (street, zip, etc.), which is slow and error-prone.
+
+### 2. Validation "Bubble"
+* **Separate Schema:** The validation is encapsulated. If the `zip` code is invalid, Mongoose throws an error specifically for that sub-document.
+* **Simple Object Array:** Validation is often "all or nothing" at the parent level. It’s harder to run complex, nested middleware or custom validators on raw objects inside an array.
+
+### 3. Casting and Defaults
+* **Separate Schema:** If you define `createdAt: { type: Date, default: Date.now }` in your `addressSchema`, every time you push an address, it gets a timestamp automatically.
+* **Simple Object Array:** You would have to manually add `Date.now()` to every object before pushing it. Mongoose won't "fill in the blanks" for raw objects.
+
+---
+
+### Comparison at a Glance
+
+| Feature | Simple Array `[{...}]` | Separate Schema `[addressSchema]` |
+| :--- | :--- | :--- |
+| **Unique ID** | No (Unless manual) | **Yes** (Automatic `_id`) |
+| **Validation** | Basic | **Advanced** (Field-level) |
+| **Defaults** | Manual only | **Automatic** |
+| **Hooks** | No `pre-save` on items | **Yes** (Sub-doc middleware) |
+
+---
+
+### First Principles: The "Sub-document" Object
+When you use a separate schema, each address in the array is an instance of a **Mongoose Sub-document**. This means you can do things like this:
+
+```typescript
+const user = await User.findById(userId);
+
+// You can use .id() to find a sub-document by its ID instantly
+const specificAddress = user.addresses.id("64a7b..."); 
+
+// You can modify it like a real document
+specificAddress.city = "Pune";
+await user.save();
+```
+
+If you used a **simple array of objects**, you would have to use `find()` or `findIndex()`, manually iterate through the array, and update the object yourself. 
 
 ---
