@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/api/v1/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 app.all("/", (req, res) => {
     return res.json({

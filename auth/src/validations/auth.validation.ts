@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v3";
 
 export const registerSchema = z.object({
     body: z.object({
@@ -11,3 +11,5 @@ export const registerSchema = z.object({
         })
     })
 })
+
+export type RegisterInput = z.infer<typeof registerSchema>["body"];
