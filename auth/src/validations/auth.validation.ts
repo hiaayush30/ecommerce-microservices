@@ -12,4 +12,12 @@ export const registerSchema = z.object({
     })
 })
 
+export const loginSchema = z.object({
+    body: z.object({
+        username: z.string().trim().toLowerCase().min(3).max(20),
+        password: z.string().trim().min(3).max(20),
+    })
+})
+
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
+export type LoginInput = z.infer<typeof loginSchema>["body"];

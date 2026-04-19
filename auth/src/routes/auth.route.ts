@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { createUser } from "../controllers/auth.controller.js";
+import { createUser, login } from "../controllers/auth.controller.js";
 import { validate } from "../middlewares/validate.middleware.js";
-import { registerSchema } from "../validations/auth.validation.js";
+import { registerSchema, loginSchema } from "../validations/auth.validation.js";
 
 const authRouter = Router();
 
 authRouter.post("/register", validate(registerSchema), createUser);
-// authRouter.post("/login");
+authRouter.post("/login", validate(loginSchema), login);
 // authRouter.post("/logout");
 // authRouter.get("/me");
 // authRouter.patch("/users/me");
