@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 interface IAddress extends Document {
     street: string,
     city: string,
     state: string,
-    zip: string,
+    pincode: number,
     country: string,
     isDefault: boolean
 }
@@ -13,7 +13,7 @@ const addressSchema = new mongoose.Schema<IAddress>({
     street: String,
     city: String,
     state: String,
-    zip: String,
+    pincode: Number,
     country: String,
     isDefault: {
         type: Boolean,

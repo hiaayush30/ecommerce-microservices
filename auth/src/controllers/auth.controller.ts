@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
-import { registerSchema, type LoginInput, type RegisterInput } from "../validations/auth.validation.js";
+import { type LoginInput, type RegisterInput, type UpdateUserInput } from "../validations/auth.validation.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { comparePassword, hashPassword } from "../utils/auth.util.js";
-import { success } from "zod";
 import { redis } from "../config/redis.config.js";
+import type { AddressInput } from "../validations/address.validation.js";
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -172,9 +172,122 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
             res.clearCookie("token");
         }
         return res.status(200).json({
-            success:true,
-            message:"logged out successfully"
+            success: true,
+            message: "logged out successfully"
         })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "internal server error"
+        })
+    }
+}
+
+
+export const getAddresses = async (req: Request, res: Response) => {
+    try {
+        const user = await User.findOne({ _id: req.user!.id });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "user not found"
+            })
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                message: "addresses fetched successfully",
+                addresses: user.addresses
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "internal server error"
+        })
+    }
+}
+
+export const createAddress = async (req: Request, res: Response) => {
+    try {
+        const address = req.body as AddressInput;
+        const user = await User.findOneAndUpdate({ _id: req.user!.id }, {
+            $push: {
+                addresses: address
+            }
+        }, { new: true })
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "user not found"
+            })
+        }
+        return res.status(201).json({
+            success: true,
+            message: "address added successfully",
+            addresses: user.addresses
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "internal server error"
+        })
+    }
+}
+
+export const deleteAddress = async (req: Request, res: Response) => {
+    try {
+        const { addressId } = req.params;
+        if (!addressId) {
+            return res.status(403).json({
+                success: false,
+                message: "address id required"
+            })
+        }
+
+        const user = await User.findOne({ _id: req.user!.id });
+        if (!user) {
+            return res.status(403).json({
+                success: false,
+                message: "user not found"
+            })
+        }
+        user.addresses = user.addresses.filter((address) => {
+            return String(address._id) != addressId;
+        });
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "address deleted successfully"
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "internal server error"
+        })
+    }
+}
+
+export const updateUser = async (req: Request, res: Response) => {
+    try {
+        const input = req.body as UpdateUserInput;
+        const user = await User.findOneAndUpdate({ _id: req.user!.id }, {
+            ...input
+        })
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"user not found"
+            })
+        }
+        else{
+            return res.status(200).json({
+                success:true,
+                message:"user updated",
+                user
+            })
+        }
     } catch (error) {
         res.status(500).json({
             success: false,
