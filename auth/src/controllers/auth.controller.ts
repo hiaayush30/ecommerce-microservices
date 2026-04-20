@@ -9,7 +9,7 @@ import type { AddressInput } from "../validations/address.validation.js";
 export const createUser = async (req: Request, res: Response) => {
     try {
 
-        const { email, fullname, password, username } = req.body as RegisterInput;
+        const { email, fullname, password, username, role } = req.body as RegisterInput;
 
         const existing = await User.findOne({
             $or: [
@@ -28,7 +28,8 @@ export const createUser = async (req: Request, res: Response) => {
             username,
             fullname,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            role 
         })
 
         const token = jwt.sign(
@@ -252,10 +253,11 @@ export const deleteAddress = async (req: Request, res: Response) => {
                 message: "user not found"
             })
         }
-        user.addresses = user.addresses.filter((address) => {
-            return String(address._id) != addressId;
-        });
-        await user.save();
+
+        await User.updateOne(
+            { _id: req.user!.id },
+            { $pull: { addresses: { _id: addressId } } }
+        );
         return res.status(200).json({
             success: true,
             message: "address deleted successfully"
@@ -275,16 +277,16 @@ export const updateUser = async (req: Request, res: Response) => {
         const user = await User.findOneAndUpdate({ _id: req.user!.id }, {
             ...input
         })
-        if(!user){
+        if (!user) {
             return res.status(404).json({
-                success:false,
-                message:"user not found"
+                success: false,
+                message: "user not found"
             })
         }
-        else{
+        else {
             return res.status(200).json({
-                success:true,
-                message:"user updated",
+                success: true,
+                message: "user updated successfully",
                 user
             })
         }
