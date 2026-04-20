@@ -68,19 +68,35 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
     try {
-        const { password, username } = req.body as LoginInput;
-        const user = await User.findOne({ username }).select("+password");
+        const { password, username, email } = req.body as LoginInput;
+        const queries = [];
+        if (email) {
+            queries.push({ email })
+        }
+        else if (username) {
+            queries.push({ username })
+        }
+        else {
+            return res.status(403).json({
+                success: false,
+                message: "username or email required"
+            })
+        }
+        const user = await User.findOne({
+            $or: queries
+        }).select("+password");
+
         if (!user) {
             return res.status(403).json({
                 success: false,
-                message: "username or password incorrect"
+                message: "invalid credentials"
             })
         }
         const validPassword = await comparePassword(password, String(user.password));
         if (!validPassword) {
             return res.status(403).json({
                 success: false,
-                message: "username or password incorrect"
+                message: "invalid credentials"
             })
         }
 
@@ -101,7 +117,7 @@ export const login = async (req: Request, res: Response) => {
                 maxAge: 24 * 60 * 60 * 1000 // 1 day 
             });
 
-            return res.status(201).json({
+            return res.status(200).json({
                 success: true,
                 message: "logged in successfully!",
                 user: {
@@ -119,6 +135,30 @@ export const login = async (req: Request, res: Response) => {
         return res.status(500).json({
             success: false,
             message: "Internal server error"
+        })
+    }
+}
+
+export const getMe = async (req: Request, res: Response) => {
+    try {
+        const user = await User.findOne({ _id: req.id! });
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"user not found"
+            })
+        }
+        else {
+            return res.status(200).json({
+                success:true,
+                message:"user found successfully",
+                user
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "internal server error"
         })
     }
 }
