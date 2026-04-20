@@ -6,16 +6,13 @@ export const protectedRoute = async (req: Request, res: Response, next: NextFunc
     try {
         const { token } = req.cookies;
         if (!token) {
-            return res.status(403).json({
+            return res.status(401).json({
                 success: false,
-                message: "authorization required"
+                message: "token not found"
             })
         }
-        const { id, role, email, username } = jwt.verify(token, process.env.JWT_PASS!) as JwtPayload;
-        req.id = id;
-        req.role = role;
-        req.email = email;
-        req.username = username;
+        const user = jwt.verify(token, process.env.JWT_PASS!) as JwtPayload;
+        req.user = user;
         next();
 
     } catch (error) {

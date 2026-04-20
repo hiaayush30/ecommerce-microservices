@@ -1,12 +1,10 @@
 import * as express from 'express';
+import type { JwtPayload } from './types.js';
 
 declare global {
   namespace Express {
     interface Request {
-      id?: string;
-      role?: "user" | "seller";
-      email ?:string;
-      username ?:string;
+      user ?: JwtPayload
     }
   }
 }

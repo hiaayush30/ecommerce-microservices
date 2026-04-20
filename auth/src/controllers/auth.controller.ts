@@ -1,9 +1,10 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { registerSchema, type LoginInput, type RegisterInput } from "../validations/auth.validation.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { comparePassword, hashPassword } from "../utils/auth.util.js";
 import { success } from "zod";
+import { redis } from "../config/redis.config.js";
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -141,20 +142,39 @@ export const login = async (req: Request, res: Response) => {
 
 export const getMe = async (req: Request, res: Response) => {
     try {
-        const user = await User.findOne({ _id: req.id! });
-        if(!user){
+        const user = await User.findOne({ _id: req.user!.id });
+        if (!user) {
             return res.status(404).json({
-                success:false,
-                message:"user not found"
+                success: false,
+                message: "user not found"
             })
         }
         else {
             return res.status(200).json({
-                success:true,
-                message:"user found successfully",
+                success: true,
+                message: "user fetched successfully",
                 user
             })
         }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "internal server error"
+        })
+    }
+}
+
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = req.cookies["token"];
+        if (token) {
+            await redis.set(`blacklist:${token}`, 'true', 'EX', 24 * 60 * 60); // entry expires in 1d (as the token also expires in 1d)
+            res.clearCookie("token");
+        }
+        return res.status(200).json({
+            success:true,
+            message:"logged out successfully"
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
