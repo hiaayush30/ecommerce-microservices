@@ -9,6 +9,8 @@ interface IProduct extends mongoose.Document {
     };
     createdAt: Date;
     updatedAt: Date;
+    seller:mongoose.Schema.Types.ObjectId;
+    images:string[]
 }
 
 const productSchema = new mongoose.Schema<IProduct>({
@@ -19,27 +21,27 @@ const productSchema = new mongoose.Schema<IProduct>({
     description: {
         type: String,
         required: true,
-        price: {
-            amount: {
-                type: Number,
-                required: true
-            },
-            currency: {
-                type: String,
-                enum:["USD","INR"],
-                default:"INR"
-            },
-            seller:{
-                type:mongoose.Schema.Types.ObjectId, // don't have a ref as it is in different db
-                required:true
-            },
-            images:[{
-                url:String,
-                thumbnail:String,
-                id:String
-            }]
+    },
+    price: {
+        amount: {
+            type: Number,
+            required: true
+        },
+        currency: {
+            type: String,
+            enum: ["USD", "INR"],
+            default: "INR"
         }
-    }
+    },
+    seller: {
+        type: mongoose.Schema.Types.ObjectId, // don't have a ref as it is in different db
+        required: true
+    },
+    images: [{
+        url: String,
+        thumbnail: String,
+        id: String
+    }]
 }, { timestamps: true })
 
-export const Product = mongoose.model<IProduct>("product",productSchema);
+export const Product = mongoose.model<IProduct>("product", productSchema);
