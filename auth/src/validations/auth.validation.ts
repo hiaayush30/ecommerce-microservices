@@ -9,7 +9,7 @@ export const registerZodSchema = z.object({
             firstName: z.string().trim().min(3).max(20),
             lastName: z.string().trim().min(3).max(20)
         }),
-        role:z.enum(["user","seller"]).optional().default("user")
+        role: z.enum(["user", "seller"]).optional().default("user")
     })
 })
 
