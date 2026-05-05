@@ -5,12 +5,16 @@ interface IProduct extends mongoose.Document {
     description: string;
     price: {
         amount: number,
-        currency: ["USD", "INR"]
+        currency: "USD" | "INR"
     };
     createdAt: Date;
     updatedAt: Date;
-    seller:mongoose.Schema.Types.ObjectId;
-    images:string[]
+    seller: mongoose.Schema.Types.ObjectId;
+    images: {
+        url: string,
+        thumbnail: string,
+        id: string
+    }[]
 }
 
 const productSchema = new mongoose.Schema<IProduct>({

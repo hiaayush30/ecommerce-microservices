@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@imagekit/nodejs": "^7.5.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/mongoose": "^5.11.96",
@@ -21,7 +22,11 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.1",
+    "multer": "^2.1.1",
     "typescript": "^6.0.3",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/multer": "^2.1.0"
   }
 }

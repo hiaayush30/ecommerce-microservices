@@ -16,7 +16,7 @@ app.all("/", (req, res) => {
     })
 })
 
-app.use("/api/product",productRouter);
+app.use("/api/products", productRouter);
 
 const port = process.env.PORT || 5001;
 connectDb()
